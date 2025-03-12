@@ -1,0 +1,220 @@
+{
+  "type": "object",
+  "properties": {
+    "container_account": {
+      "type": "string"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "accounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "checking",
+              "savings",
+              "credit"
+            ]
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "filename": {
+                  "type": "string"
+                },
+                "date_format": {
+                  "type": "string",
+                  "default": "%Y-%m-%d"
+                },
+                "timezone": {
+                  "type": "string"
+                },
+                "headers": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "columns": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "date",
+                          "date2",
+                          "status",
+                          "code",
+                          "description",
+                          "comment",
+                          "comment1",
+                          "comment2",
+                          "comment3",
+                          "comment4",
+                          "comment5",
+                          "comment6",
+                          "comment7",
+                          "comment8",
+                          "comment9",
+                          "account1",
+                          "account2",
+                          "account3",
+                          "account4",
+                          "account5",
+                          "account6",
+                          "account7",
+                          "account8",
+                          "account9",
+                          "amount1",
+                          "amount2",
+                          "amount3",
+                          "amount4",
+                          "amount5",
+                          "amount6",
+                          "amount7",
+                          "amount8",
+                          "amount9",
+                          "amount1-in",
+                          "amount2-in",
+                          "amount3-in",
+                          "amount4-in",
+                          "amount5-in",
+                          "amount6-in",
+                          "amount7-in",
+                          "amount8-in",
+                          "amount9-in",
+                          "amount1-out",
+                          "amount2-out",
+                          "amount3-out",
+                          "amount4-out",
+                          "amount5-out",
+                          "amount6-out",
+                          "amount7-out",
+                          "amount8-out",
+                          "amount9-out"
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "rules": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "direction": {
+                            "type": "string",
+                            "enum": [
+                              "in",
+                              "out"
+                            ],
+                            "default": "out"
+                          },
+                          "match": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                {
+                                  "type": [
+                                    "string",
+                                    "number"
+                                  ]
+                                },
+                                {
+                                  "type": "array",
+                                  "items": {
+                                    "type": [
+                                      "string",
+                                      "number"
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "set": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "match",
+                          "set"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "include": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "include"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "name",
+                "filename",
+                "timezone",
+                "columns",
+                "rules"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "sources"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "container_account",
+    "categories",
+    "accounts"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
