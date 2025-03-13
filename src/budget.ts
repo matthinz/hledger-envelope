@@ -1,18 +1,28 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { parse as parseYAML } from "yaml";
-import { BUDGET_SCHEMA, type Account, type ImportSource } from "./schemas.ts";
+import {
+  BUDGET_SCHEMA,
+  type Account,
+  type Budget,
+  type ImportSource,
+} from "./schemas.ts";
 
 const UNASSIGNED_CATEGORY = "Unassigned";
 
-export async function loadBudget(filename: string) {
+export async function loadBudget(
+  filename: string,
+): Promise<Budget & { filename: string }> {
   const text = await fs.readFile(filename, "utf8");
   const yaml = parseYAML(text);
   const budget = BUDGET_SCHEMA.parse(yaml);
   if (!budget.categories.includes(UNASSIGNED_CATEGORY)) {
     budget.categories.push(UNASSIGNED_CATEGORY);
   }
-  return budget;
+  return {
+    ...budget,
+    filename,
+  };
 }
 
 export function getImportRulesFilename(account: Account, source: ImportSource) {

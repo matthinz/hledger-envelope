@@ -3,8 +3,11 @@ import { z } from "zod";
 export type Account = z.infer<typeof ACCOUNT_SCHEMA>;
 export type Budget = z.infer<typeof BUDGET_SCHEMA>;
 export type ImportSource = z.infer<typeof SOURCE_SCHEMA>;
-export type MatchRule = z.infer<typeof MATCH_RULE_SCHEMA>;
+
 export type IncludeRule = z.infer<typeof INCLUDE_RULE_SCHEMA>;
+export type SetRule = z.infer<typeof SET_RULE_SCHEMA>;
+export type TransferRule = z.infer<typeof TRANSFER_RULE_SCHEMA>;
+
 export type Rule = z.infer<typeof RULE_SCHEMA>;
 
 export const HLEDGER_FIELD = z.enum([
@@ -72,13 +75,17 @@ const MATCH_VALUE_SCHEMA = z
 
 const MATCH_SET_SCHEMA = z.record(
   z.union([HLEDGER_FIELD, z.enum(["envelope"])]),
-  z.string()
+  z.string(),
 );
 
-export const MATCH_RULE_SCHEMA = z.object({
+const MATCH_SCHEMA = z
+  .record(MATCH_KEY_SCHEMA, MATCH_VALUE_SCHEMA)
+  .or(z.string());
+
+export const SET_RULE_SCHEMA = z.object({
   name: z.string().optional(),
   direction: z.enum(["in", "out"]).default("out"),
-  match: z.record(MATCH_KEY_SCHEMA, MATCH_VALUE_SCHEMA),
+  match: MATCH_SCHEMA,
   set: MATCH_SET_SCHEMA,
 });
 
@@ -86,7 +93,22 @@ export const INCLUDE_RULE_SCHEMA = z.object({
   include: z.string(),
 });
 
-export const RULE_SCHEMA = z.union([MATCH_RULE_SCHEMA, INCLUDE_RULE_SCHEMA]);
+export const TRANSFER_RULE_SCHEMA = z.object({
+  match: MATCH_SCHEMA,
+  transfer: z.boolean(),
+});
+
+export const RULE_SCHEMA = z.union([
+  INCLUDE_RULE_SCHEMA,
+  SET_RULE_SCHEMA,
+  TRANSFER_RULE_SCHEMA,
+]);
+
+export const RULES_SCHEMA = z.array(RULE_SCHEMA);
+
+export const INCLUDE_FILE_RULES_SCHEMA = z.object({
+  rules: RULES_SCHEMA,
+});
 
 export const SOURCE_SCHEMA = z.object({
   name: z.string(),
@@ -96,7 +118,7 @@ export const SOURCE_SCHEMA = z.object({
   timezone: z.string(),
   headers: z.boolean().default(true),
   columns: z.array(HLEDGER_FIELD.or(z.string())),
-  rules: z.array(RULE_SCHEMA),
+  rules: RULES_SCHEMA,
 });
 
 export const ACCOUNT_SCHEMA = z.object({
