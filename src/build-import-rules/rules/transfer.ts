@@ -22,17 +22,21 @@ export function buildTransferRule(
         return result;
       }
 
+      const accountName = account.nickname ?? account.name;
+      const otherAccountName = otherAccount.nickname ?? otherAccount.name;
+
       // Case 1: Money moving out of this account to another
       const importAccountAsSource = buildSetRule(
         {
           direction: "out",
           match: replaceTokensInMatch(rule.match, [
-            [/__SOURCE__/, account.nickname ?? account.name],
-            [/__DESTINATION__/, otherAccount.nickname ?? otherAccount.name],
+            [/__SOURCE__/, accountName],
+            [/__DESTINATION__/, otherAccountName],
           ]),
           set: {
             account1: account.name,
             account2: otherAccount.name,
+            description: `Transfer: ${accountName} -> ${otherAccountName}`,
           },
         },
         budget,
@@ -44,12 +48,13 @@ export function buildTransferRule(
         {
           direction: "in",
           match: replaceTokensInMatch(rule.match, [
-            [/__SOURCE__/, otherAccount.nickname ?? otherAccount.name],
-            [/__DESTINATION__/, account.nickname ?? account.name],
+            [/__SOURCE__/, otherAccountName],
+            [/__DESTINATION__/, accountName],
           ]),
           set: {
             account1: otherAccount.name,
             account2: account.name,
+            description: `Transfer: ${otherAccountName} -> ${accountName}`,
           },
         },
         budget,

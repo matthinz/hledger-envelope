@@ -168,11 +168,13 @@ describe("#buildIfStatements", () => {
         "%description Transfer from Checking to Savings",
         "  account1 Checking",
         "  account2 Savings",
+        "  description Transfer: Checking -> Savings",
         "",
         "if",
         "%description Transfer from Savings to Checking",
         "  account1 Savings",
         "  account2 Checking",
+        "  description Transfer: Savings -> Checking",
       ].join("\n");
 
       assert.equal(await buildIfStatements(rules, budget, account), expected);
