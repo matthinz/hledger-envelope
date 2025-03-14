@@ -64,7 +64,12 @@ export const HLEDGER_FIELD = z.enum([
   "amount9-out",
 ]);
 
-export const ACCOUNT_TYPES_SCHEMA = z.enum(["checking", "savings", "credit"]);
+export const ACCOUNT_TYPES_SCHEMA = z.enum([
+  "checking",
+  "savings",
+  "credit",
+  "loan",
+]);
 
 const MATCH_KEY_SCHEMA = HLEDGER_FIELD.or(z.string());
 

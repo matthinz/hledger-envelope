@@ -21,7 +21,7 @@ describe("#buildIfStatements", () => {
       },
     ],
   } as unknown as Budget;
-  const account = {} as unknown as Account;
+  const account = budget.accounts[0];
 
   describe("SetRule", () => {
     describe("setting account2", () => {
@@ -36,7 +36,37 @@ describe("#buildIfStatements", () => {
         }),
       ];
 
-      const expected = ["if", "%description foo", "  account2 Bar"].join("\n");
+      const expected = [
+        "if",
+        "%description foo",
+        "  account1 Checking",
+        "  account2 Bar",
+      ].join("\n");
+
+      it("generates the correct result", async () => {
+        assert.equal(await buildIfStatements(rules, budget, account), expected);
+      });
+    });
+
+    describe("setting account1 and account2", () => {
+      const rules = [
+        SET_RULE_SCHEMA.parse({
+          match: {
+            description: "foo",
+          },
+          set: {
+            account1: "Bar",
+            account2: "Baz",
+          },
+        }),
+      ];
+
+      const expected = [
+        "if",
+        "%description foo",
+        "  account1 Bar",
+        "  account2 Baz",
+      ].join("\n");
 
       it("generates the correct result", async () => {
         assert.equal(await buildIfStatements(rules, budget, account), expected);
