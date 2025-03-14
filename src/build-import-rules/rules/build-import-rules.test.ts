@@ -1,16 +1,14 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
-import { buildImportRules } from "./build-import-rules.ts";
+import { buildIfStatements } from "./build-import-rules.ts";
 import {
   type Budget,
   type Account,
-  type ImportSource,
-  type SetRule,
   SET_RULE_SCHEMA,
   RULE_SCHEMA,
 } from "../../schemas.ts";
 
-describe("#buildImportRules", () => {
+describe("#buildIfStatements", () => {
   const budget = {
     container_account: "Checking",
     categories: ["Expenses:Groceries"],
@@ -24,7 +22,6 @@ describe("#buildImportRules", () => {
     ],
   } as unknown as Budget;
   const account = {} as unknown as Account;
-  const source = {} as unknown as ImportSource;
 
   describe("SetRule", () => {
     describe("setting account2", () => {
@@ -41,8 +38,8 @@ describe("#buildImportRules", () => {
 
       const expected = ["if", "%description foo", "  account2 Bar"].join("\n");
 
-      it("generates the correct result", () => {
-        assert.equal(buildImportRules(rules, budget, account), expected);
+      it("generates the correct result", async () => {
+        assert.equal(await buildIfStatements(rules, budget, account), expected);
       });
     });
 
@@ -70,8 +67,11 @@ describe("#buildImportRules", () => {
           "  account2 Expenses:Groceries",
         ].join("\n");
 
-        it("generates the correct result", () => {
-          assert.equal(buildImportRules(rules, budget, account), expected);
+        it("generates the correct result", async () => {
+          assert.equal(
+            await buildIfStatements(rules, budget, account),
+            expected,
+          );
         });
       });
 
@@ -92,22 +92,22 @@ describe("#buildImportRules", () => {
           type: "credit",
         } as unknown as Account;
 
-        const expected = [
-          "if",
-          "%description foo",
-          "  account1 CreditCard",
-          "  amount1 -%amount1-out",
-          "  account2 Expenses:Groceries",
-          "  amount2 %amount1-out",
-          "  account3 Checking:Budget:Expenses:Groceries",
-          "  amount3 -%amount1-out",
-          "  account4 Checking:Budget:Payments:CreditCard",
-          "  amount4 %amount1-out",
-        ].join("\n");
+        it("generates the correct result", async () => {
+          const expected = [
+            "if",
+            "%description foo",
+            "  account1 CreditCard",
+            "  amount1 -%amount1-out",
+            "  account2 Expenses:Groceries",
+            "  amount2 %amount1-out",
+            "  account3 Checking:Budget:Expenses:Groceries",
+            "  amount3 -%amount1-out",
+            "  account4 Checking:Budget:Payments:CreditCard",
+            "  amount4 %amount1-out",
+          ].join("\n");
 
-        const actual = buildImportRules(rules, budget, account);
+          const actual = await buildIfStatements(rules, budget, account);
 
-        it("generates the correct result", () => {
           assert.equal(actual, expected);
         });
       });
@@ -119,35 +119,33 @@ describe("#buildImportRules", () => {
   });
 
   describe("TransferRule", () => {
-    describe("with numbers referencing regex capture groups", () => {
-      it("generates the correct result", () => {
-        const rules = [
-          RULE_SCHEMA.parse({
-            match: {
-              description: "Transfer from __FROM__ to __TO__",
-            },
-            transfer: true,
-          }),
-        ];
+    it("generates if statements replacing __SOURCE__ and __DESTINATION__", async () => {
+      const rules = [
+        RULE_SCHEMA.parse({
+          match: {
+            description: "Transfer from __SOURCE__ to __DESTINATION__",
+          },
+          transfer: true,
+        }),
+      ];
 
-        const account = {
-          name: "Checking",
-        } as unknown as Account;
+      const account = {
+        name: "Checking",
+      } as unknown as Account;
 
-        const expected = [
-          "if",
-          "%description Transfer from Checking to Savings",
-          "  account1 Checking",
-          "  account2 Savings",
-          "",
-          "if",
-          "%description Transfer from Savings to Checking",
-          "  account1 Savings",
-          "  account2 Checking",
-        ].join("\n");
+      const expected = [
+        "if",
+        "%description Transfer from Checking to Savings",
+        "  account1 Checking",
+        "  account2 Savings",
+        "",
+        "if",
+        "%description Transfer from Savings to Checking",
+        "  account1 Savings",
+        "  account2 Checking",
+      ].join("\n");
 
-        assert.equal(buildImportRules(rules, budget, account), expected);
-      });
+      assert.equal(await buildIfStatements(rules, budget, account), expected);
     });
   });
 });

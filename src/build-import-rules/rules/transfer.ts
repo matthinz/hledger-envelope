@@ -28,7 +28,7 @@ export function buildTransferRule(
           direction: "out",
           match: replaceTokensInMatch(rule.match, [
             [/__SOURCE__/, account.nickname ?? account.name],
-            [/__DESTINATION__/, otherAccount.nickname ?? account.name],
+            [/__DESTINATION__/, otherAccount.nickname ?? otherAccount.name],
           ]),
           set: {
             account1: account.name,
@@ -45,7 +45,7 @@ export function buildTransferRule(
           direction: "in",
           match: replaceTokensInMatch(rule.match, [
             [/__SOURCE__/, otherAccount.nickname ?? otherAccount.name],
-            [/__DESTINATION__/, account.nickname ?? otherAccount.name],
+            [/__DESTINATION__/, account.nickname ?? account.name],
           ]),
           set: {
             account1: otherAccount.name,
@@ -60,7 +60,7 @@ export function buildTransferRule(
 
       return result;
     }, [])
-    .join("\n");
+    .join("\n\n");
 }
 
 function replaceTokensInMatch(

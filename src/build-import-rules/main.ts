@@ -1,7 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { loadBudget, getImportRulesFilename } from "../budget.ts";
-import { buildImportRules } from "./rules/build-import-rules.ts";
+import type { Budget, Account, ImportSource } from "../schemas.ts";
+import {
+  buildIfStatements,
+  buildHeader,
+  buildProperties,
+} from "./rules/build-import-rules.ts";
 
 export async function run(args: string[]) {
   const budget = await loadBudget("budget.yaml");
@@ -12,11 +17,7 @@ export async function run(args: string[]) {
         (promise, source) =>
           promise.then(async () => {
             const filename = getImportRulesFilename(account, source);
-            const content = await buildImportRules(
-              source.rules,
-              budget,
-              account,
-            );
+            const content = await buildFileContent(budget, account, source);
 
             await fs.mkdir(path.dirname(filename), { recursive: true });
             await fs.writeFile(filename, content);
@@ -25,4 +26,21 @@ export async function run(args: string[]) {
       ),
     Promise.resolve(),
   );
+}
+
+export async function buildFileContent(
+  budget: Budget & { filename?: string },
+  account: Account,
+  source: ImportSource,
+): Promise<string> {
+  return [
+    buildHeader(budget, account, source),
+    "",
+    buildProperties(source),
+    "",
+    "# Import Rules",
+    "# ------------",
+    "",
+    await buildIfStatements(source.rules, budget, account),
+  ].join("\n");
 }

@@ -2,8 +2,13 @@ import type { SetRule } from "../../schemas.ts";
 
 type RuleWithCriteria = Pick<SetRule, "direction" | "match">;
 
-export function buildCriteria({ match }: RuleWithCriteria): string[] {
+export function buildCriteria({
+  direction,
+  match,
+}: RuleWithCriteria): string[] {
   const matchBlock = typeof match === "string" ? { description: match } : match;
+
+  const amountField = direction === "in" ? "amount1-in" : "amount1-out";
 
   return Object.entries(matchBlock).map(([field, value], index) => {
     value = Array.isArray(value) ? value : [value];
@@ -15,6 +20,10 @@ export function buildCriteria({ match }: RuleWithCriteria): string[] {
 
       return String(v);
     });
+
+    if (field === "amount") {
+      field = amountField;
+    }
 
     const result = `%${field} ${expressions.length === 1 ? expressions[0] : `(${expressions.join("|")})`}`;
     return index > 0 ? `&${result}` : result;

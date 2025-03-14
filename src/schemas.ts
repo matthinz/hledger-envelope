@@ -125,7 +125,7 @@ export const ACCOUNT_SCHEMA = z.object({
   name: z.string(),
   nickname: z.string().optional(),
   type: ACCOUNT_TYPES_SCHEMA,
-  sources: z.array(SOURCE_SCHEMA),
+  sources: z.array(SOURCE_SCHEMA).default([]),
 });
 
 export const BUDGET_SCHEMA = z.object({
